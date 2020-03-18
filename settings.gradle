@@ -1,0 +1,2 @@
+rootProject.name='Rebble Memos'
+include ':app'

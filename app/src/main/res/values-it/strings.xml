@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Impostazioni</string>
+    <string name="memo_title">Titolo del Promemoria</string>
+    <string name="memo_subtitle">Sottotitolo Promemoria (opzionale)</string>
+    <string name="memo_body">Corpo del Promemoria (Opzionale)</string>
+    <string name="select_time">Seleziona Orario</string>
+    <string name="select_date">Seleziona Data</string>
+    <string name="send_timeline">Invia alla Timeline!</string>
+    <string name="time_hint">Orario</string>
+    <string name="date_hint">Data</string>
+    <string name="timeline_token">Token Timeline</string>
+    <string name="memo_icon">Icona Promemoria</string>
+</resources>
