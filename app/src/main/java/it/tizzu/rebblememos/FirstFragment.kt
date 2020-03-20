@@ -2,17 +2,22 @@ package it.tizzu.rebblememos
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import kotlinx.android.synthetic.main.fragment_first.*
+import kotlinx.android.synthetic.main.token_dialog.view.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+import it.tizzu.rebblememos.MainActivity
+import kotlinx.android.synthetic.*
+import org.w3c.dom.Text
 
 class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -82,6 +87,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_first, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -93,6 +99,12 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val dateView: TextView = view.findViewById(R.id.date_display)
 
         val sendButton: Button = view.findViewById(R.id.send_to_timeline)
+
+        val changeTokenButton : Button = view.findViewById(R.id.change_token_button)
+
+        changeTokenButton.setOnClickListener() {
+            tokenDialog(view.context)
+        }
 
         //Date / Time stuff
         val c = Calendar.getInstance()
@@ -212,3 +224,5 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
 
 }
+
+

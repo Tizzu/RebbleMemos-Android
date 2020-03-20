@@ -11,5 +11,9 @@
     <string name="date_hint">Date</string>
     <string name="timeline_token">Timeline Token</string>
     <string name="memo_icon">Memo Icon</string>
+    <string name="tokenButton">Button</string>
+    <string name="insert_your_token_here">Insert your token here</string>
+    <string name="token">token</string>
+    <string name="done">Done</string>
     <!-- Strings used for fragments for navigation -->
 </resources>
