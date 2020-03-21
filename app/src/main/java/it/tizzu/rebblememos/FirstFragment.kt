@@ -2,8 +2,10 @@ package it.tizzu.rebblememos
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.SharedPreferences
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -78,6 +80,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     var iconDisplay: ImageView? = null
     val json : JSONObject? = JSONObject()
     val layout : JSONObject? = JSONObject()
+    var name = ""
 
     // Creation of the fragment, pretty standard
     override fun onCreateView(
@@ -87,11 +90,16 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_first, container, false)
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //val timelineEdit : EditText = view.findViewById(R.id.timeline_token_edit)
+        val titleEdit : EditText = view.findViewById(R.id.memo_title_edit)
+        val subtitleEdit : EditText = view.findViewById(R.id.memo_subtitle_edit)
+        val bodyEdit : EditText = view.findViewById(R.id.memo_body_edit)
+
         val timePickerButton: Button = view.findViewById(R.id.btn_time)
         val timeView: TextView = view.findViewById(R.id.time_display)
 
@@ -112,6 +120,23 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val month = c.get(Calendar.MONTH)
         val day = c.get(Calendar.DAY_OF_MONTH)
 
+        var hour = c.get(Calendar.HOUR).toString()
+        var minute = c.get(Calendar.MINUTE).toString()
+        var monthAdj = month + 1
+
+        if (hour.toInt() in 1..9)
+        {
+            hour = ("0" + hour)
+        }
+
+        if (minute.toInt() in 1..9)
+        {
+            minute = ("0" + minute)
+        }
+
+        timeView.setText("$hour:$minute")
+        dateView.setText("$day/$monthAdj/$year")
+
         // Icon Stuff
         val spinner: Spinner = view.findViewById(R.id.icon_selector)
         val aa = ArrayAdapter(this.context!!, android.R.layout.simple_spinner_item, icons)
@@ -120,15 +145,17 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         spinner.setAdapter(aa)
         spinner.onItemSelectedListener = this
 
-        //JSON Stuff
-
         //Summon the Android Date Picker and save its result into the TextView
         datePickerButton.setOnClickListener {
 
             val datePicker = DatePickerDialog(
                 this.context!!,
-                DatePickerDialog.OnDateSetListener { _, year, _, dayOfMonth ->
-                    dateView.setText("$dayOfMonth/$month/$year")
+                DatePickerDialog.OnDateSetListener { _, year, newMonth, dayOfMonth ->
+                    monthAdj = newMonth + 1
+                    dateView.setText("$dayOfMonth/$monthAdj/$year")
+                    c.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    c.set(Calendar.MONTH, month)
+                    c.set(Calendar.YEAR, year)
                 },
                 year,
                 month,
@@ -139,31 +166,44 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
 
         timePickerButton.setOnClickListener {
-            val calendar = Calendar.getInstance()
             val timeSetListener = TimePickerDialog.OnTimeSetListener { _, hour, minute ->
-                calendar.set(Calendar.HOUR_OF_DAY, hour)
-                calendar.set(Calendar.MINUTE, minute)
-                timeView.text = SimpleDateFormat("HH:mm").format(calendar.time)
+                c.set(Calendar.HOUR_OF_DAY, hour)
+                c.set(Calendar.MINUTE, minute)
+                timeView.text = SimpleDateFormat("HH:mm").format(c.time)
             }
             TimePickerDialog(
                 activity,
                 timeSetListener,
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
+                c.get(Calendar.HOUR_OF_DAY),
+                c.get(Calendar.MINUTE),
                 true
             ).show()
         }
 
-        send_to_timeline.setOnClickListener{
+        sendButton.setOnClickListener{
+
+            json!!.put("id", "TBD")
+            json.put("time", c.time.toInstant().toString())
+
+            layout!!.put("type", "genericPin")
+            layout.put("title", titleEdit.text)
+            layout.put("subtitle", subtitleEdit.text)
+            layout.put("body", bodyEdit.text)
+            layout.put("tinyIcon", "system://images/" + name)
+
+            json.put("layout", layout)
+
+            Log.i("JSON", json.toString())
 
         }
 
     }
 
+
     override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        var name = icons[position]
+        name = icons[position]
         when (name)
         {
             "NOTIFICATION_REMINDER" -> iconDisplay!!.setImageResource(R.drawable.notification_reminder)

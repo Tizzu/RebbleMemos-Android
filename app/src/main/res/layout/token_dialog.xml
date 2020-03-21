@@ -7,27 +7,27 @@
     android:paddingBottom="20sp">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/welcomeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="177dp"
         android:layout_marginTop="29dp"
         android:layout_marginEnd="177dp"
-        android:text="Welcome to Rebble Memo"
+        android:text="@string/first_time"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text2"
+        android:id="@+id/askTokenText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
-        android:text="Insert your token here"
+        android:text="@string/insert_token"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/welcomeText" />
 
     <EditText
         android:id="@+id/dialogToken"
@@ -37,11 +37,12 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="30dp"
         android:ems="10"
-        android:hint="Token"
+        android:hint="@string/timeline_token"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text2" />
+        app:layout_constraintTop_toBottomOf="@+id/askTokenText"
+        android:importantForAutofill="no" />
 
     <Button
         android:id="@+id/dialogDoneBtn"
@@ -51,7 +52,7 @@
         android:layout_marginStart="46dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="89dp"
-        android:text="Done"
+        android:text="@string/done"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/dialogCancelBtn"
         app:layout_constraintTop_toBottomOf="@+id/dialogToken" />
@@ -64,7 +65,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="46dp"
-        android:text="Cancel"
+        android:text="@android:string/cancel"
         app:layout_constraintEnd_toStartOf="@+id/dialogDoneBtn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dialogToken" />
