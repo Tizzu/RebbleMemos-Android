@@ -2,24 +2,23 @@ package it.tizzu.rebblememos
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.SharedPreferences
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.fragment_first.*
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.token_dialog.view.*
 import org.json.JSONObject
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
-import it.tizzu.rebblememos.MainActivity
-import kotlinx.android.synthetic.*
-import org.w3c.dom.Text
+import javax.net.ssl.HttpsURLConnection
+
 
 class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -78,9 +77,16 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         "TV_SHOW"
     )
     var iconDisplay: ImageView? = null
-    val json : JSONObject? = JSONObject()
-    val layout : JSONObject? = JSONObject()
+    val json: JSONObject? = JSONObject()
+    val layout: JSONObject? = JSONObject()
     var name = ""
+    var preferences: SharedPreferences? = null
+    var tokenDisplay: TextView? = null
+    var ok = true
+    var pinID: String = ""
+    var url: URL? = null
+    val charPool: List<Char> = ('a'..'m') + ('n'..'z')
+    var toast : Toast? = null
 
     // Creation of the fragment, pretty standard
     override fun onCreateView(
@@ -95,10 +101,16 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //val timelineEdit : EditText = view.findViewById(R.id.timeline_token_edit)
-        val titleEdit : EditText = view.findViewById(R.id.memo_title_edit)
-        val subtitleEdit : EditText = view.findViewById(R.id.memo_subtitle_edit)
-        val bodyEdit : EditText = view.findViewById(R.id.memo_body_edit)
+        preferences = activity!!.getSharedPreferences(getString(R.string.preferences), 0)
+        if (preferences!!.getBoolean("firstTime", true))
+            tokenDialog(context!!)
+
+        tokenDisplay = view.findViewById(R.id.token_edit)
+
+
+        val titleEdit: EditText = view.findViewById(R.id.memo_title_edit)
+        val subtitleEdit: EditText = view.findViewById(R.id.memo_subtitle_edit)
+        val bodyEdit: EditText = view.findViewById(R.id.memo_body_edit)
 
         val timePickerButton: Button = view.findViewById(R.id.btn_time)
         val timeView: TextView = view.findViewById(R.id.time_display)
@@ -108,11 +120,21 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
         val sendButton: Button = view.findViewById(R.id.send_to_timeline)
 
-        val changeTokenButton : Button = view.findViewById(R.id.change_token_button)
+        val changeTokenButton: Button = view.findViewById(R.id.change_token_button)
+
+        //Token Display
+        if (preferences!!.getString("timelineToken", "") == "")
+            tokenDisplay!!.setText(R.string.no_token_set)
+        else
+            tokenDisplay!!.setText(preferences!!.getString("timelineToken", "Errore"))
+
+
+        //Token Change
 
         changeTokenButton.setOnClickListener() {
             tokenDialog(view.context)
         }
+
 
         //Date / Time stuff
         val c = Calendar.getInstance()
@@ -124,13 +146,11 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         var minute = c.get(Calendar.MINUTE).toString()
         var monthAdj = month + 1
 
-        if (hour.toInt() in 1..9)
-        {
+        if (hour.toInt() in 1..9) {
             hour = ("0" + hour)
         }
 
-        if (minute.toInt() in 1..9)
-        {
+        if (minute.toInt() in 1..9) {
             minute = ("0" + minute)
         }
 
@@ -180,32 +200,81 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
             ).show()
         }
 
-        sendButton.setOnClickListener{
+        sendButton.setOnClickListener {
+            ok = true
+            if (titleEdit.getText().toString().trim() == "") {
+                titleEdit.setError(getString(R.string.required_field))
+                ok = false
+            }
+            if (preferences!!.getString("timelineToken", "") == "") {
+                tokenDisplay!!.setError(getString(R.string.no_token_set))
+                ok = false
+            }
 
-            json!!.put("id", "TBD")
-            json.put("time", c.time.toInstant().toString())
+            if (ok) {
+                pinID = "RMAN-"
+                pinID += (1..13).map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
+                    .map(charPool::get)
+                    .joinToString("")
 
-            layout!!.put("type", "genericPin")
-            layout.put("title", titleEdit.text)
-            layout.put("subtitle", subtitleEdit.text)
-            layout.put("body", bodyEdit.text)
-            layout.put("tinyIcon", "system://images/" + name)
+                json!!.put("id", pinID)
+                json.put("time", c.time.toInstant().toString())
 
-            json.put("layout", layout)
+                layout!!.put("type", "genericPin")
+                layout.put("title", titleEdit.text)
+                layout.put("subtitle", subtitleEdit.text)
+                layout.put("body", bodyEdit.text)
+                layout.put("tinyIcon", "system://images/" + name)
 
-            Log.i("JSON", json.toString())
+                json.put("layout", layout)
 
+                url = URL("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
+
+                var thread: Thread = Thread(Runnable {
+                    Looper.prepare()
+                    with(url!!.openConnection() as HttpsURLConnection)
+                    {
+
+                        requestMethod = "PUT"
+                        setRequestProperty("Content-Type", "application/json")
+                        setRequestProperty(
+                            "X-User-Token",
+                            preferences!!.getString("timelineToken", "")
+                        )
+                        setDoOutput(true)
+
+                        getOutputStream().use({ os ->
+                            val input: ByteArray = json.toString().toByteArray(Charsets.UTF_8)
+                            os.write(input, 0, input.size)
+                        })
+
+                        val response = responseCode
+                        when (response)
+                        {
+                            200 -> toast = Toast.makeText(context,getString(R.string.all_good) + pinID,Toast.LENGTH_LONG)
+                            400 -> toast =Toast.makeText(context, getString(R.string.contact_tizzu),Toast.LENGTH_LONG)
+                            403 -> toast =Toast.makeText(context, getString(R.string.contact_tizzu),Toast.LENGTH_LONG)
+                            410 -> toast =Toast.makeText(context,getString(R.string.check_your_token),Toast.LENGTH_LONG)
+                            429 -> toast =Toast.makeText(context,getString(R.string.too_many_pins),Toast.LENGTH_LONG)
+                            500 -> toast =Toast.makeText(context,getString(R.string.server_unreachable),Toast.LENGTH_LONG)
+                        }
+
+                        activity!!.runOnUiThread {
+                            toast!!.show()
+                        }
+                    }
+                    Looper.loop()
+                })
+                thread.start()
+            }
         }
-
     }
-
 
     override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         name = icons[position]
-        when (name)
-        {
+        when (name) {
             "NOTIFICATION_REMINDER" -> iconDisplay!!.setImageResource(R.drawable.notification_reminder)
             "ALARM_CLOCK" -> iconDisplay!!.setImageResource(R.drawable.alarm_clock)
             "AMERICAN_FOOTBALL" -> iconDisplay!!.setImageResource(R.drawable.american_football)
@@ -220,7 +289,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
             "GENERIC_CONFIRMATION" -> iconDisplay!!.setImageResource(R.drawable.generic_confirmation)
             "GENERIC_EMAIL" -> iconDisplay!!.setImageResource(R.drawable.generic_email)
             "GENERIC_QUESTION" -> iconDisplay!!.setImageResource(R.drawable.generic_question)
-            "GENERIC_WARNING"-> iconDisplay!!.setImageResource(R.drawable.generic_warning)
+            "GENERIC_WARNING" -> iconDisplay!!.setImageResource(R.drawable.generic_warning)
             "GLUCOSE_MONITOR" -> iconDisplay!!.setImageResource(R.drawable.glucose_monitor)
             "HEAVY_RAIN" -> iconDisplay!!.setImageResource(R.drawable.heavy_rain)
             "HEAVY_SNOW" -> iconDisplay!!.setImageResource(R.drawable.heavy_snow)
@@ -262,7 +331,60 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     }
 
+    fun tokenDialog(context: Context) {
+        val mDialogView = LayoutInflater.from(context).inflate(R.layout.token_dialog, null)
+        //AlertDialogBuilder
+        val mBuilder = AlertDialog.Builder(context)
+            .setView(mDialogView)
+        val welcomeText: TextView = mDialogView.welcomeText
+        val dialogToken: EditText = mDialogView.findViewById(R.id.dialogToken)
+        if (preferences!!.getBoolean("firstTime", true))
+            welcomeText.setText(R.string.first_time)
+        else
+            welcomeText.setText(R.string.not_first_time)
 
+        dialogToken.setText(preferences!!.getString("timelineToken", ""))
+
+        //show dialog
+        val mAlertDialog = mBuilder.show()
+
+        //Done button click of custom layout
+        mDialogView.dialogDoneBtn.setOnClickListener {
+            //Done dialog
+            mAlertDialog.dismiss()
+            if (preferences!!.getBoolean("firstTime", true)) {
+                with(preferences!!.edit()) {
+                    putBoolean("firstTime", false)
+                    apply()
+                }
+            }
+
+            with(preferences!!.edit()) {
+                putString("timelineToken", dialogToken.text.toString())
+                apply()
+            }
+
+            if (dialogToken.text.toString() != "") {
+                tokenDisplay!!.setText(dialogToken.text.toString())
+            } else {
+                tokenDisplay!!.setText(R.string.no_token_set)
+            }
+
+        }
+        //cancel button click
+        mDialogView.dialogCancelBtn.setOnClickListener {
+            //dismiss dialog
+            mAlertDialog.dismiss()
+            if (preferences!!.getBoolean("firstTime", true))
+                with(preferences!!.edit()) {
+                    putBoolean("firstTime", false)
+                    apply()
+                }
+        }
+    }
 }
+
+
+
 
 

@@ -16,5 +16,14 @@
     <string name="done">Done</string>
     <string name="preferences" translatable="false">preferences</string>
     <string name="not_first_time">Token Setup</string>
+    <string name="token" translatable="false">Token:</string>
+    <string name="edit_token">Change</string>
+    <string name="no_token_set">No Token Set</string>
+    <string name="required_field">Required Field</string>
+    <string name="all_good">Memo Sent! ID:</string>
+    <string name="contact_tizzu">Memo not sent! Contact the Author</string>
+    <string name="check_your_token">Memo not sent! Check your Token and try again</string>
+    <string name="too_many_pins">Memo not sent! Too many pins sent! Try again later</string>
+    <string name="server_unreachable">Memo not sent! Server is unreachable</string>
     <!-- Strings used for fragments for navigation -->
 </resources>

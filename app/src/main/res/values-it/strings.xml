@@ -15,4 +15,12 @@
     <string name="insert_token">Inserisci il tuo token qui</string>
     <string name="done">Fatto</string>
     <string name="not_first_time">Impostazione del Token</string>
+    <string name="edit_token">Modifica</string>
+    <string name="no_token_set">Nessun Token Inserito</string>
+    <string name="required_field">Campo Obbligatorio</string>
+    <string name="all_good">"Promemoria inviato! ID: "</string>
+    <string name="contact_tizzu">Promemoria non inviato! Contatta l\'autore</string>
+    <string name="check_your_token">Promemoria non Inviato! Controlla il token e riprova</string>
+    <string name="too_many_pins">Promemoria non inviato! Inviati troppi pin! Riprova più tardi</string>
+    <string name="server_unreachable">Promemoria non inviato! Server non disponibile</string>
 </resources>

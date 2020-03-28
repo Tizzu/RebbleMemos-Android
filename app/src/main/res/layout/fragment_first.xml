@@ -20,7 +20,7 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tokenText" />
+        app:layout_constraintTop_toBottomOf="@+id/token_text" />
 
     <EditText
         android:id="@+id/memo_subtitle_edit"
@@ -145,35 +145,41 @@
         app:srcCompat="@drawable/alarm_clock" />
 
     <TextView
-        android:id="@+id/tokenText"
+        android:id="@+id/token_text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="47dp"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="60dp"
-        android:text="Token :"
+        android:layout_marginTop="44dp"
+        android:gravity="center_vertical"
+        android:text="@string/token"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tokenEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/token_edit"
+        android:layout_width="190dp"
+        android:layout_height="47dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="60dp"
-        android:text="Token"
-        app:layout_constraintStart_toEndOf="@+id/tokenText"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:contextClickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:text="@string/no_token_set"
+        app:layout_constraintEnd_toStartOf="@+id/change_token_button"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/token_text"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/change_token_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="164dp"
         android:layout_marginTop="44dp"
         android:layout_marginEnd="24dp"
-        android:text="Change"
+        android:text="@string/edit_token"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tokenEdit"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
