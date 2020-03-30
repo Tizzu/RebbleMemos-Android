@@ -142,15 +142,18 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val month = c.get(Calendar.MONTH)
         val day = c.get(Calendar.DAY_OF_MONTH)
 
-        var hour = c.get(Calendar.HOUR).toString()
+        val cInOneYear : Calendar = Calendar.getInstance()
+        cInOneYear.set(Calendar.YEAR, year+1)
+
+        var hour = c.get(Calendar.HOUR_OF_DAY).toString()
         var minute = c.get(Calendar.MINUTE).toString()
         var monthAdj = month + 1
 
-        if (hour.toInt() in 1..9) {
+        if (hour.toInt() in 0..9) {
             hour = ("0" + hour)
         }
 
-        if (minute.toInt() in 1..9) {
+        if (minute.toInt() in 0..9) {
             minute = ("0" + minute)
         }
 
@@ -181,6 +184,8 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 month,
                 day
             )
+            datePicker.datePicker.minDate = System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 2)
+            datePicker.datePicker.maxDate = cInOneYear.timeInMillis
             datePicker.show()
 
         }
