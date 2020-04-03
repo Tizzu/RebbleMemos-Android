@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.token_dialog.view.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -78,7 +80,6 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     )
     var iconDisplay: ImageView? = null
     val json: JSONObject? = JSONObject()
-    val layout: JSONObject? = JSONObject()
     var name = ""
     var preferences: SharedPreferences? = null
     var tokenDisplay: TextView? = null
@@ -86,7 +87,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     var pinID: String = ""
     var url: URL? = null
     val charPool: List<Char> = ('a'..'m') + ('n'..'z')
-    var toast : Toast? = null
+    var toast: Toast? = null
 
     // Creation of the fragment, pretty standard
     override fun onCreateView(
@@ -122,6 +123,9 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
         val changeTokenButton: Button = view.findViewById(R.id.change_token_button)
 
+        val onArrivalCheck: CheckBox = view.findViewById(R.id.notify_arrival_check)
+        val onEventCheckBox: CheckBox = view.findViewById(R.id.notify_on_event_check)
+
         //Token Display
         if (preferences!!.getString("timelineToken", "") == "")
             tokenDisplay!!.setText(R.string.no_token_set)
@@ -142,8 +146,8 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val month = c.get(Calendar.MONTH)
         val day = c.get(Calendar.DAY_OF_MONTH)
 
-        val cInOneYear : Calendar = Calendar.getInstance()
-        cInOneYear.set(Calendar.YEAR, year+1)
+        val cInOneYear: Calendar = Calendar.getInstance()
+        cInOneYear.set(Calendar.YEAR, year + 1)
 
         var hour = c.get(Calendar.HOUR_OF_DAY).toString()
         var minute = c.get(Calendar.MINUTE).toString()
@@ -225,13 +229,13 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 json!!.put("id", pinID)
                 json.put("time", c.time.toInstant().toString())
 
-                layout!!.put("type", "genericPin")
-                layout.put("title", titleEdit.text)
-                layout.put("subtitle", subtitleEdit.text)
-                layout.put("body", bodyEdit.text)
-                layout.put("tinyIcon", "system://images/" + name)
+                if (onArrivalCheck.isChecked)
+                    json.put("createNotification", notification(title = getString(R.string.new_memo), body = titleEdit.text.toString(), tinyIcon = "NOTIFICATION_FLAG"))
 
-                json.put("layout", layout)
+                if (onEventCheckBox.isChecked)
+                    json.put("reminders", reminder(c.time.toInstant().toString(), titleEdit.text.toString(), subtitleEdit.text.toString(), bodyEdit.text.toString(), name))
+
+                json.put("layout", layout("genericPin", titleEdit.text.toString(), subtitleEdit.text.toString(), bodyEdit.text.toString(), name))
 
                 url = URL("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
 
@@ -254,14 +258,13 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                         })
 
                         val response = responseCode
-                        when (response)
-                        {
-                            200 -> toast = Toast.makeText(context,getString(R.string.all_good) + pinID,Toast.LENGTH_LONG)
-                            400 -> toast =Toast.makeText(context, getString(R.string.contact_tizzu),Toast.LENGTH_LONG)
-                            403 -> toast =Toast.makeText(context, getString(R.string.contact_tizzu),Toast.LENGTH_LONG)
-                            410 -> toast =Toast.makeText(context,getString(R.string.check_your_token),Toast.LENGTH_LONG)
-                            429 -> toast =Toast.makeText(context,getString(R.string.too_many_pins),Toast.LENGTH_LONG)
-                            500 -> toast =Toast.makeText(context,getString(R.string.server_unreachable),Toast.LENGTH_LONG)
+                        when (response) {
+                            200 -> toast = Toast.makeText(context, getString(R.string.all_good) + pinID, Toast.LENGTH_LONG)
+                            400 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
+                            403 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
+                            410 -> toast = Toast.makeText(context, getString(R.string.check_your_token), Toast.LENGTH_LONG)
+                            429 -> toast = Toast.makeText(context, getString(R.string.too_many_pins), Toast.LENGTH_LONG)
+                            500 -> toast = Toast.makeText(context, getString(R.string.server_unreachable), Toast.LENGTH_LONG)
                         }
 
                         activity!!.runOnUiThread {
@@ -386,6 +389,34 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     apply()
                 }
         }
+    }
+
+    fun layout(type: String, title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONObject {
+        val res: JSONObject = JSONObject()
+        res.put("type", type)
+        res.put("title", title)
+        if (subtitle != "")
+            res.put("subtitle", subtitle)
+        if (body != "")
+            res.put("body", body)
+        res.put("tinyIcon", "system://images/" + tinyIcon)
+        return res
+    }
+
+    fun reminder (time: String, title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONArray {
+        val res : JSONArray = JSONArray()
+        val resItem : JSONObject = JSONObject()
+        resItem.put("time", time)
+        resItem.put("layout", layout("genericReminder", title, subtitle, body, tinyIcon))
+        res.put(resItem)
+        return res
+    }
+
+    fun notification (title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONObject
+    {
+        val res : JSONObject = JSONObject()
+        res.put("layout", layout("genericNotification", title, subtitle, body, tinyIcon))
+        return res
     }
 }
 

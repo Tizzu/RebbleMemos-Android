@@ -59,7 +59,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="@string/time_hint"
         android:textAlignment="center"
@@ -74,7 +74,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
         android:text="@string/date_hint"
         android:textAlignment="center"
@@ -100,9 +100,13 @@
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
         android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toTopOf="@+id/send_to_timeline"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/icon_display"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/notify_on_event_check" />
 
     <Button
         android:id="@+id/send_to_timeline"
@@ -142,6 +146,7 @@
         app:layout_constraintBottom_toTopOf="@+id/send_to_timeline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon_selector"
+        app:layout_constraintTop_toBottomOf="@+id/notify_on_event_check"
         app:srcCompat="@drawable/alarm_clock" />
 
     <TextView
@@ -149,7 +154,7 @@
         android:layout_width="wrap_content"
         android:layout_height="47dp"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="16dp"
         android:gravity="center_vertical"
         android:text="@string/token"
         app:layout_constraintStart_toStartOf="parent"
@@ -160,7 +165,7 @@
         android:layout_width="190dp"
         android:layout_height="47dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:clickable="true"
         android:contextClickable="true"
@@ -176,10 +181,34 @@
         android:id="@+id/change_token_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
         android:text="@string/edit_token"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/notify_arrival_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:layout_marginBottom="2dp"
+        android:text="@string/notify_on_arrival"
+        app:layout_constraintBottom_toTopOf="@+id/notify_on_event_check"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_time" />
+
+    <CheckBox
+        android:id="@+id/notify_on_event_check"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="24dp"
+        android:text="@string/notify_on_event"
+        app:layout_constraintBottom_toTopOf="@+id/icon_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/notify_arrival_check" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

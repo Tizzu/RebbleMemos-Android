@@ -25,5 +25,8 @@
     <string name="check_your_token">Memo not sent! Check your Token and try again</string>
     <string name="too_many_pins">Memo not sent! Too many pins sent! Try again later</string>
     <string name="server_unreachable">Memo not sent! Server is unreachable</string>
+    <string name="notify_on_arrival">Notify Memo Arrival on Watch</string>
+    <string name="notify_on_event">Send a notification on time</string>
+    <string name="new_memo">New Memo!</string>
     <!-- Strings used for fragments for navigation -->
 </resources>

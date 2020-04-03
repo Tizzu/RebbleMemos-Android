@@ -23,4 +23,7 @@
     <string name="check_your_token">Promemoria non Inviato! Controlla il token e riprova</string>
     <string name="too_many_pins">Promemoria non inviato! Inviati troppi pin! Riprova più tardi</string>
     <string name="server_unreachable">Promemoria non inviato! Server non disponibile</string>
+    <string name="notify_on_arrival">Notifica Arrivo Promemoria sull\'orologio</string>
+    <string name="notify_on_event">Invia una notifica per quell\'ora</string>
+    <string name="new_memo">Nuovo Promemoria!</string>
 </resources>
