@@ -125,7 +125,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                 Snackbar.make(view, "Version " + result + " avaiable!", Snackbar.LENGTH_INDEFINITE).setAction("Download") {
                     val browserIntent = Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://www.google.it")
+                        Uri.parse("https://tizzu.github.io/")
                     )
                     startActivity(browserIntent)
                 }.show()
