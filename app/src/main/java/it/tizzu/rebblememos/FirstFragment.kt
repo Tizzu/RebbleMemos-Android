@@ -3,7 +3,9 @@ package it.tizzu.rebblememos
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -13,14 +15,18 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.token_dialog.view.*
 import org.json.JSONArray
 import org.json.JSONObject
+import org.jsoup.Connection
+import java.lang.Exception
+import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
-
+import org.jsoup.Jsoup
 
 class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
@@ -88,6 +94,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
     var url: URL? = null
     val charPool: List<Char> = ('a'..'m') + ('n'..'z')
     var toast: Toast? = null
+    var result = ""
 
     // Creation of the fragment, pretty standard
     override fun onCreateView(
@@ -105,6 +112,28 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         preferences = activity!!.getSharedPreferences(getString(R.string.preferences), 0)
         if (preferences!!.getBoolean("firstTime", true))
             tokenDialog(context!!)
+
+        var threadURL: Thread = Thread(Runnable {
+            Looper.prepare()
+            val doc = Jsoup.connect("https://tizzu.github.io/android/latest.html").get()
+            println("HERE! " + doc)
+            result = doc.body().text()
+            println("HERE! " + result)
+
+
+            if (BuildConfig.VERSION_NAME != result)
+                Snackbar.make(view, "Version " + result + " avaiable!", Snackbar.LENGTH_INDEFINITE).setAction("Download") {
+                    val browserIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.it")
+                    )
+                    startActivity(browserIntent)
+                }.show()
+
+            Looper.loop()
+        })
+
+        threadURL.start()
 
         tokenDisplay = view.findViewById(R.id.token_edit)
 
@@ -241,35 +270,31 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
                 var thread: Thread = Thread(Runnable {
                     Looper.prepare()
-                    with(url!!.openConnection() as HttpsURLConnection)
-                    {
 
-                        requestMethod = "PUT"
-                        setRequestProperty("Content-Type", "application/json")
-                        setRequestProperty(
+                    var execute : Connection.Response = Jsoup.connect("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
+                        .header("Content-Type", "application/json")
+                        .header(
                             "X-User-Token",
                             preferences!!.getString("timelineToken", "")
-                        )
-                        setDoOutput(true)
+                        ).method(Connection.Method.PUT)
+                        .requestBody(json.toString())
+                        .timeout(0)
+                        .execute()
 
-                        getOutputStream().use({ os ->
-                            val input: ByteArray = json.toString().toByteArray(Charsets.UTF_8)
-                            os.write(input, 0, input.size)
-                        })
+                    var statusCode : Int = execute.statusCode()
+                    Log.i("RES", statusCode.toString())
 
-                        val response = responseCode
-                        when (response) {
-                            200 -> toast = Toast.makeText(context, getString(R.string.all_good) + pinID, Toast.LENGTH_LONG)
-                            400 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
-                            403 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
-                            410 -> toast = Toast.makeText(context, getString(R.string.check_your_token), Toast.LENGTH_LONG)
-                            429 -> toast = Toast.makeText(context, getString(R.string.too_many_pins), Toast.LENGTH_LONG)
-                            500 -> toast = Toast.makeText(context, getString(R.string.server_unreachable), Toast.LENGTH_LONG)
-                        }
+                    when (statusCode) {
+                        200 -> toast = Toast.makeText(context, getString(R.string.all_good) + pinID, Toast.LENGTH_LONG)
+                        400 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
+                        403 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
+                        410 -> toast = Toast.makeText(context, getString(R.string.check_your_token), Toast.LENGTH_LONG)
+                        429 -> toast = Toast.makeText(context, getString(R.string.too_many_pins), Toast.LENGTH_LONG)
+                        500 -> toast = Toast.makeText(context, getString(R.string.server_unreachable), Toast.LENGTH_LONG)
+                    }
 
-                        activity!!.runOnUiThread {
-                            toast!!.show()
-                        }
+                    activity!!.runOnUiThread {
+                        toast!!.show()
                     }
                     Looper.loop()
                 })
@@ -403,18 +428,17 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         return res
     }
 
-    fun reminder (time: String, title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONArray {
-        val res : JSONArray = JSONArray()
-        val resItem : JSONObject = JSONObject()
+    fun reminder(time: String, title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONArray {
+        val res: JSONArray = JSONArray()
+        val resItem: JSONObject = JSONObject()
         resItem.put("time", time)
         resItem.put("layout", layout("genericReminder", title, subtitle, body, tinyIcon))
         res.put(resItem)
         return res
     }
 
-    fun notification (title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONObject
-    {
-        val res : JSONObject = JSONObject()
+    fun notification(title: String, subtitle: String = "", body: String = "", tinyIcon: String): JSONObject {
+        val res: JSONObject = JSONObject()
         res.put("layout", layout("genericNotification", title, subtitle, body, tinyIcon))
         return res
     }
