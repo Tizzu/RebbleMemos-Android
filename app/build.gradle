@@ -14,7 +14,7 @@ android {
         versionName '1.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        versionNameSuffix = '.3'
+        versionNameSuffix = '.4'
     }
 
     buildTypes {

@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.token_dialog.view.*
 import org.json.JSONArray
 import org.json.JSONObject
 import org.jsoup.Connection
+import org.jsoup.HttpStatusException
 import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
@@ -116,9 +117,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
         var threadURL: Thread = Thread(Runnable {
             Looper.prepare()
             val doc = Jsoup.connect("https://tizzu.github.io/android/latest.html").get()
-            println("HERE! " + doc)
             result = doc.body().text()
-            println("HERE! " + result)
 
 
             if (BuildConfig.VERSION_NAME != result)
@@ -210,7 +209,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     monthAdj = newMonth + 1
                     dateView.setText("$dayOfMonth/$monthAdj/$year")
                     c.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    c.set(Calendar.MONTH, month)
+                    c.set(Calendar.MONTH, newMonth)
                     c.set(Calendar.YEAR, year)
                 },
                 year,
@@ -266,28 +265,32 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
                 json.put("layout", layout("genericPin", titleEdit.text.toString(), subtitleEdit.text.toString(), bodyEdit.text.toString(), name))
 
-                url = URL("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
 
+                url = URL("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
                 var thread: Thread = Thread(Runnable {
                     Looper.prepare()
+                    var statusCode = 0
+                    try {
+                        var execute: Connection.Response = Jsoup.connect("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
+                            .header("Content-Type", "application/json")
+                            .header(
+                                "X-User-Token",
+                                preferences!!.getString("timelineToken", "")
+                            ).method(Connection.Method.PUT)
+                            .requestBody(json.toString())
+                            .timeout(0)
+                            .execute()
 
-                    var execute : Connection.Response = Jsoup.connect("https://timeline-api.rebble.io/v1/user/pins/" + pinID)
-                        .header("Content-Type", "application/json")
-                        .header(
-                            "X-User-Token",
-                            preferences!!.getString("timelineToken", "")
-                        ).method(Connection.Method.PUT)
-                        .requestBody(json.toString())
-                        .timeout(0)
-                        .execute()
-
-                    var statusCode : Int = execute.statusCode()
-                    Log.i("RES", statusCode.toString())
+                        statusCode = execute.statusCode()
+                    }
+                    catch (e: HttpStatusException) {
+                        statusCode = e.statusCode
+                    }
 
                     when (statusCode) {
                         200 -> toast = Toast.makeText(context, getString(R.string.all_good) + pinID, Toast.LENGTH_LONG)
-                        400 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
-                        403 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu), Toast.LENGTH_LONG)
+                        400 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu) + " - Error 400", Toast.LENGTH_LONG)
+                        403 -> toast = Toast.makeText(context, getString(R.string.contact_tizzu) + " - Error 403", Toast.LENGTH_LONG)
                         410 -> toast = Toast.makeText(context, getString(R.string.check_your_token), Toast.LENGTH_LONG)
                         429 -> toast = Toast.makeText(context, getString(R.string.too_many_pins), Toast.LENGTH_LONG)
                         500 -> toast = Toast.makeText(context, getString(R.string.server_unreachable), Toast.LENGTH_LONG)
@@ -296,9 +299,12 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
                     activity!!.runOnUiThread {
                         toast!!.show()
                     }
+
                     Looper.loop()
                 })
                 thread.start()
+
+
             }
         }
     }
