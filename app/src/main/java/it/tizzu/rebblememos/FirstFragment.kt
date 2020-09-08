@@ -360,7 +360,7 @@ class FirstFragment : Fragment(), AdapterView.OnItemSelectedListener {
             "SUNSET" -> iconDisplay!!.setImageResource(R.drawable.sunset)
             "TIDE_IS_HIGH" -> iconDisplay!!.setImageResource(R.drawable.tide_is_high)
             "TIMELINE_BASEBALL" -> iconDisplay!!.setImageResource(R.drawable.timeline_baseball)
-            "TIMELINE_CALENDAR" -> iconDisplay!!.setImageResource(R.drawable.timeline_baseball)
+            "TIMELINE_CALENDAR" -> iconDisplay!!.setImageResource(R.drawable.timeline_calendar)
             "TIMELINE_MISSED_CALL" -> iconDisplay!!.setImageResource(R.drawable.timeline_missed_call)
             "TIMELINE_SPORTS" -> iconDisplay!!.setImageResource(R.drawable.timeline_sports)
             "TIMELINE_SUN" -> iconDisplay!!.setImageResource(R.drawable.timeline_sun)
